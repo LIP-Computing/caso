@@ -14,11 +14,16 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import warnings
+
 import dirq.QueueSimple
 from oslo_config import cfg
+from oslo_log import log
 
 import caso.messenger
 from caso import utils
+
+LOG = log.getLogger(__name__)
 
 opts = [
     cfg.StrOpt('output_path',
@@ -31,7 +36,7 @@ CONF = cfg.CONF
 CONF.register_opts(opts, group="ssm")
 
 
-class SsmMessager(caso.messenger.BaseMessenger):
+class SSMMessengerV02(caso.messenger.BaseMessenger):
     header = "APEL-cloud-message: v0.2"
     separator = "%%"
 
@@ -59,3 +64,14 @@ class SsmMessager(caso.messenger.BaseMessenger):
         # FIXME(aloga): try except here
         queue = dirq.QueueSimple.QueueSimple(CONF.ssm.output_path)
         queue.add(message)
+
+
+class SsmMessager(SSMMessengerV02):
+    def __init__(self):
+        msg = ("Using deprecated caso.messenger.ssm.SsmMessager, "
+               "please use caso.messenger.ssm.SSMMessengerV02 if you "
+               "wish to continue usinf the 0.2 version of the record, "
+               "or refer to the cASO documentation.")
+        warnings.DeprecationWarning(msg)
+        LOG.warning(msg)
+        super(SsmMessager, self).__init__()
