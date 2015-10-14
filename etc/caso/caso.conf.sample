@@ -4,6 +4,11 @@
 # From caso
 #
 
+# List of messenger that will dispatch records. valid values are
+# ['caso.messenger.ssm.SsmMessager', 'caso.messenger.noop.NoopMessenger',
+# 'caso.messenger.logstash.LogstashMessenger'] (list value)
+#messengers = caso.messenger.noop.NoopMessenger
+
 # Spool directory. (string value)
 #spooldir = /var/spool/caso
 
@@ -27,9 +32,6 @@
 # anything, nova will be used. (string value)
 # Allowed values: nova, ceilometer
 #extractor = nova
-
-# List of messenger that will dispatch records. (list value)
-#messengers = caso.messenger.noop.NoopMessenger
 
 #
 # From oslo.log
