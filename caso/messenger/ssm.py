@@ -38,7 +38,7 @@ CONF = cfg.CONF
 CONF.register_opts(opts, group="ssm")
 
 
-__all__ = ["SsmMessager", "SSMMessengerV02"]
+__all__ = ["SsmMessager", "SSMMessengerV02", "SSMMessengerV04"]
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -75,6 +75,10 @@ class _SSMBaseMessenger(caso.messenger.BaseMessenger):
 
 class SSMMessengerV02(_SSMBaseMessenger):
     version = "0.2"
+
+
+class SSMMessengerV04(_SSMBaseMessenger):
+    version = "0.4"
 
 
 class SsmMessager(SSMMessengerV02):
