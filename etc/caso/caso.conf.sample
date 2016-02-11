@@ -20,6 +20,9 @@
 # Site name as in GOCDB. (string value)
 #site_name = <None>
 
+# Service name within the site (string value)
+#service_name = $site_name
+
 # List of tenants to extract accounting records from. (list value)
 #tenants =
 
