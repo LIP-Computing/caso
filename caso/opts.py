@@ -16,8 +16,9 @@
 
 import itertools
 
-import caso.extract.base
+import caso.extract.ceilometer
 import caso.extract.manager
+import caso.extract.nova
 import caso.manager
 import caso.messenger.logstash
 import caso.messenger.ssm
@@ -32,5 +33,6 @@ def list_opts():
          ),
         ('logstash', caso.messenger.logstash.opts),
         ('ssm', caso.messenger.ssm.opts),
-        ('extractor', caso.extract.base.opts),
+        ('extractor_nova', caso.extract.nova.opts),
+        ('extractor_ceilometer', caso.extract.ceilometer.opts),
     ]

@@ -35,6 +35,11 @@ opts = [
     cfg.ListOpt('tenants',
                 default=[],
                 help='List of tenants to extract accounting records from.'),
+    cfg.StrOpt('mapping_file',
+               default='/etc/caso/voms.json',
+               deprecated_group="extractor",
+               help='File containing the VO <-> tenant mapping as used '
+               'in Keystone-VOMS.'),
 ]
 
 cli_opts = [
