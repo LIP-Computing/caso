@@ -21,24 +21,50 @@ from oslo_log import log
 
 from caso.extract import nova
 
+opts = [
+    cfg.StrOpt('user',
+               default='accounting',
+               deprecated_group="extractor",
+               help='User to authenticate as.'),
+    cfg.StrOpt('password',
+               default='',
+               deprecated_group="extractor",
+               help='Password to authenticate with.'),
+    cfg.StrOpt('endpoint',
+               default='',
+               deprecated_group="extractor",
+               help='Keystone endpoint to autenticate with.'),
+    cfg.BoolOpt('insecure',
+                default=False,
+                deprecated_group="extractor",
+                help='Perform an insecure connection (i.e. do '
+                'not verify the server\'s certificate. DO NOT USE '
+                'IN PRODUCTION.'),
+]
+
 CONF = cfg.CONF
-CONF.import_opt("user", "caso.extract.base", "extractor")
-CONF.import_opt("password", "caso.extract.base", "extractor")
-CONF.import_opt("endpoint", "caso.extract.base", "extractor")
-CONF.import_opt("insecure", "caso.extract.base", "extractor")
+CONF.register_opts(opts, group="extractor_ceilometer")
 
 LOG = log.getLogger(__name__)
 
 
 class CeilometerExtractor(nova.OpenStackExtractor):
+    def __init__(self):
+        super(CeilometerExtractor, self).__init__(
+            CONF.extractor_ceilometer.user,
+            CONF.extractor_ceilometer.password,
+            CONF.extractor_ceilometer.endpoint,
+            CONF.extractor_ceilometer.insecure
+        )
+
     def _get_ceilometer_client(self, tenant):
         return ceilometerclient.client.get_client(
             '2',
-            os_auth_url=CONF.extractor.endpoint,
-            os_username=CONF.extractor.user,
-            os_password=CONF.extractor.password,
+            os_auth_url=self.endpoint,
+            os_username=self.user,
+            os_password=self.password,
             os_tenant_name=tenant,
-            insecure=CONF.extractor.insecure)
+            insecure=self.insecure)
 
     def _build_query(self, project_id=None, start_date=None, end_date=None):
         q = []

@@ -22,29 +22,8 @@ from oslo_config import cfg
 from oslo_log import log
 import six
 
-opts = [
-    cfg.StrOpt('user',
-               default='accounting',
-               help='User to authenticate as.'),
-    cfg.StrOpt('password',
-               default='',
-               help='Password to authenticate with.'),
-    cfg.StrOpt('endpoint',
-               default='',
-               help='Keystone endpoint to autenticate with.'),
-    cfg.BoolOpt('insecure',
-                default=False,
-                help='Perform an insecure connection (i.e. do '
-                'not verify the server\'s certificate. DO NOT USE '
-                'IN PRODUCTION.'),
-    cfg.StrOpt('mapping_file',
-               default='/etc/caso/voms.json',
-               help='File containing the VO <-> tenant mapping as used '
-               'in Keystone-VOMS.'),
-]
-
 CONF = cfg.CONF
-CONF.register_opts(opts, group="extractor")
+CONF.import_opt("mapping_file", "caso.extract.manager")
 
 LOG = log.getLogger(__name__)
 
@@ -75,9 +54,14 @@ openstack_vm_statuses = {
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseExtractor(object):
-    def __init__(self):
+    def __init__(self, user, password, endpoint, insecure):
+        self.user = user
+        self.password = password
+        self.endpoint = endpoint
+        self.insecure = insecure
+
         try:
-            mapping = json.loads(open(CONF.extractor.mapping_file).read())
+            mapping = json.loads(open(CONF.mapping_file).read())
         except ValueError:
             # FIXME(aloga): raise a proper exception here
             raise
@@ -97,11 +81,11 @@ class BaseExtractor(object):
 
     def _get_keystone_client(self, tenant):
         client = keystoneclient.v2_0.client.Client(
-            username=CONF.extractor.user,
-            password=CONF.extractor.password,
+            username=self.user,
+            password=self.password,
             tenant_name=tenant,
-            auth_url=CONF.extractor.endpoint,
-            insecure=CONF.extractor.insecure)
+            auth_url=self.endpoint,
+            insecure=self.insecure)
         client.authenticate()
         return client
 

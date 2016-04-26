@@ -24,25 +24,49 @@ from caso.extract import base
 from caso.extract import utils
 from caso import record
 
+opts = [
+    cfg.StrOpt('user',
+               default='accounting',
+               deprecated_group="extractor",
+               help='User to authenticate as.'),
+    cfg.StrOpt('password',
+               default='',
+               deprecated_group="extractor",
+               help='Password to authenticate with.'),
+    cfg.StrOpt('endpoint',
+               default='',
+               deprecated_group="extractor",
+               help='Keystone endpoint to autenticate with.'),
+    cfg.BoolOpt('insecure',
+                default=False,
+                deprecated_group="extractor",
+                help='Perform an insecure connection (i.e. do '
+                'not verify the server\'s certificate. DO NOT USE '
+                'IN PRODUCTION.'),
+]
+
 CONF = cfg.CONF
+CONF.register_opts(opts, group="extractor_nova")
+CONF.import_opt("extractor", "caso.extract.manager")
 CONF.import_opt("site_name", "caso.extract.manager")
-CONF.import_opt("service_name", "caso.extract.manager")
-CONF.import_opt("user", "caso.extract.base", "extractor")
-CONF.import_opt("password", "caso.extract.base", "extractor")
-CONF.import_opt("endpoint", "caso.extract.base", "extractor")
-CONF.import_opt("insecure", "caso.extract.base", "extractor")
 
 
 class OpenStackExtractor(base.BaseExtractor):
+    def __init__(self):
+        super(OpenStackExtractor, self).__init__(CONF.extractor_nova.user,
+                                                 CONF.extractor_nova.password,
+                                                 CONF.extractor_nova.endpoint,
+                                                 CONF.extractor_nova.insecure)
+
     def _get_conn(self, tenant):
         client = novaclient.client.Client
         conn = client(
             2,
-            CONF.extractor.user,
-            CONF.extractor.password,
+            self.user,
+            self.password,
             tenant,
-            CONF.extractor.endpoint,
-            insecure=CONF.extractor.insecure,
+            self.endpoint,
+            insecure=self.insecure,
             service_type="compute")
         conn.authenticate()
         return conn
