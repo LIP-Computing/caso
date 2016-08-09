@@ -139,52 +139,86 @@
 #fatal_deprecations = false
 
 
-[extractor_ceilometer]
+[keystone_auth]
 
 #
 # From caso
 #
 
-# User to authenticate as. (string value)
-# Deprecated group/name - [extractor]/user
-#user = accounting
+# Authentication type to load (string value)
+# Deprecated group/name - [keystone_auth]/auth_plugin
+#auth_type = <None>
 
-# Password to authenticate with. (string value)
-# Deprecated group/name - [extractor]/password
-#password =
+# Config Section from which to load plugin specific options (string value)
+#auth_section = <None>
 
-# Keystone endpoint to autenticate with. (string value)
-# Deprecated group/name - [extractor]/endpoint
-#endpoint =
+# PEM encoded Certificate Authority to use when verifying HTTPs connections.
+# (string value)
+#cafile = <None>
 
-# Perform an insecure connection (i.e. do not verify the server's certificate.
-# DO NOT USE IN PRODUCTION. (boolean value)
-# Deprecated group/name - [extractor]/insecure
+# PEM encoded client certificate cert file (string value)
+#certfile = <None>
+
+# PEM encoded client certificate key file (string value)
+#keyfile = <None>
+
+# Verify HTTPS connections. (boolean value)
 #insecure = false
 
+# Timeout value for http requests (integer value)
+#timeout = <None>
 
-[extractor_nova]
+# Authentication URL (string value)
+#auth_url = <None>
 
-#
-# From caso
-#
+# Domain ID to scope to (string value)
+#domain_id = <None>
 
-# User to authenticate as. (string value)
-# Deprecated group/name - [extractor]/user
-#user = accounting
+# Domain name to scope to (string value)
+#domain_name = <None>
 
-# Password to authenticate with. (string value)
-# Deprecated group/name - [extractor]/password
-#password =
+# Project ID to scope to (string value)
+# Deprecated group/name - [keystone_auth]/tenant-id
+#project_id = <None>
 
-# Keystone endpoint to autenticate with. (string value)
-# Deprecated group/name - [extractor]/endpoint
-#endpoint =
+# Project name to scope to (string value)
+# Deprecated group/name - [keystone_auth]/tenant-name
+#project_name = <None>
 
-# Perform an insecure connection (i.e. do not verify the server's certificate.
-# DO NOT USE IN PRODUCTION. (boolean value)
-# Deprecated group/name - [extractor]/insecure
-#insecure = false
+# Domain ID containing project (string value)
+#project_domain_id = <None>
+
+# Domain name containing project (string value)
+#project_domain_name = <None>
+
+# Trust ID (string value)
+#trust_id = <None>
+
+# Optional domain ID to use with v3 and v2 parameters. It will be used for both
+# the user and project domain in v3 and ignored in v2 authentication. (string
+# value)
+#default_domain_id = <None>
+
+# Optional domain name to use with v3 API and v2 parameters. It will be used
+# for both the user and project domain in v3 and ignored in v2 authentication.
+# (string value)
+#default_domain_name = <None>
+
+# User id (string value)
+#user_id = <None>
+
+# Username (string value)
+# Deprecated group/name - [keystone_auth]/user-name
+#username = <None>
+
+# User's domain id (string value)
+#user_domain_id = <None>
+
+# User's domain name (string value)
+#user_domain_name = <None>
+
+# User's password (string value)
+#password = <None>
 
 
 [logstash]

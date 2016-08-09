@@ -17,10 +17,11 @@
 import abc
 import json
 
-import keystoneclient.v2_0.client
 from oslo_config import cfg
 from oslo_log import log
 import six
+
+from caso import keystone_client
 
 CONF = cfg.CONF
 CONF.import_opt("mapping_file", "caso.extract.manager")
@@ -54,12 +55,7 @@ openstack_vm_statuses = {
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseExtractor(object):
-    def __init__(self, user, password, endpoint, insecure):
-        self.user = user
-        self.password = password
-        self.endpoint = endpoint
-        self.insecure = insecure
-
+    def __init__(self):
         try:
             mapping = json.loads(open(CONF.mapping_file).read())
         except ValueError:
@@ -80,13 +76,7 @@ class BaseExtractor(object):
                     self.voms_map[tenant] = vo
 
     def _get_keystone_client(self, tenant):
-        client = keystoneclient.v2_0.client.Client(
-            username=self.user,
-            password=self.password,
-            tenant_name=tenant,
-            auth_url=self.endpoint,
-            insecure=self.insecure)
-        client.authenticate()
+        client = keystone_client.get_client(CONF, tenant)
         return client
 
     def _get_keystone_users(self, ks_client):

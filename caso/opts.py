@@ -16,9 +16,8 @@
 
 import itertools
 
-import caso.extract.ceilometer
 import caso.extract.manager
-import caso.extract.nova
+import caso.keystone_client
 import caso.manager
 import caso.messenger.logstash
 import caso.messenger.ssm
@@ -31,8 +30,7 @@ def list_opts():
                                     caso.extract.manager.opts,
                                     caso.extract.manager.cli_opts)
          ),
+        ('keystone_auth', caso.keystone_client.opts),
         ('logstash', caso.messenger.logstash.opts),
         ('ssm', caso.messenger.ssm.opts),
-        ('extractor_nova', caso.extract.nova.opts),
-        ('extractor_ceilometer', caso.extract.ceilometer.opts),
     ]

@@ -22,54 +22,21 @@ from oslo_config import cfg
 
 from caso.extract import base
 from caso.extract import utils
+from caso import keystone_client
 from caso import record
 
-opts = [
-    cfg.StrOpt('user',
-               default='accounting',
-               deprecated_group="extractor",
-               help='User to authenticate as.'),
-    cfg.StrOpt('password',
-               default='',
-               deprecated_group="extractor",
-               help='Password to authenticate with.'),
-    cfg.StrOpt('endpoint',
-               default='',
-               deprecated_group="extractor",
-               help='Keystone endpoint to autenticate with.'),
-    cfg.BoolOpt('insecure',
-                default=False,
-                deprecated_group="extractor",
-                help='Perform an insecure connection (i.e. do '
-                'not verify the server\'s certificate. DO NOT USE '
-                'IN PRODUCTION.'),
-]
-
 CONF = cfg.CONF
-CONF.register_opts(opts, group="extractor_nova")
 CONF.import_opt("extractor", "caso.extract.manager")
 CONF.import_opt("site_name", "caso.extract.manager")
 
 
 class OpenStackExtractor(base.BaseExtractor):
     def __init__(self):
-        super(OpenStackExtractor, self).__init__(CONF.extractor_nova.user,
-                                                 CONF.extractor_nova.password,
-                                                 CONF.extractor_nova.endpoint,
-                                                 CONF.extractor_nova.insecure)
+        super(OpenStackExtractor, self).__init__()
 
-    def _get_conn(self, tenant):
-        client = novaclient.client.Client
-        conn = client(
-            2,
-            self.user,
-            self.password,
-            tenant,
-            self.endpoint,
-            insecure=self.insecure,
-            service_type="compute")
-        conn.authenticate()
-        return conn
+    def _get_nova_client(self, tenant):
+        session = keystone_client.get_session(CONF, tenant)
+        return novaclient.client.Client(2, session=session)
 
     def extract_for_tenant(self, tenant, lastrun, extract_to):
         """Extract records for a tenant from given date querying nova.
@@ -89,11 +56,12 @@ class OpenStackExtractor(base.BaseExtractor):
         lastrun = lastrun.replace(tzinfo=None)
 
         # Try and except here
-        conn = self._get_conn(tenant)
-        ks_conn = self._get_keystone_client(tenant)
-        users = self._get_keystone_users(ks_conn)
-        tenant_id = conn.client.tenant_id
-        servers = conn.servers.list(search_opts={"changes-since": lastrun})
+        nova = self._get_nova_client(tenant)
+        ks_client = self._get_keystone_client(tenant)
+        users = self._get_keystone_users(ks_client)
+        tenant_id = nova.client.session.get_project_id()
+
+        servers = nova.servers.list(search_opts={"changes-since": lastrun})
 
         servers = sorted(servers, key=operator.attrgetter("created"))
 
@@ -103,10 +71,10 @@ class OpenStackExtractor(base.BaseExtractor):
         else:
             start = lastrun
 
-        aux = conn.usage.get(tenant_id, start, extract_to)
+        aux = nova.usage.get(tenant_id, start, extract_to)
         usages = getattr(aux, "server_usages", [])
 
-        images = conn.images.list()
+        images = nova.images.list()
         records = {}
 
         vo = self.voms_map.get(tenant)
