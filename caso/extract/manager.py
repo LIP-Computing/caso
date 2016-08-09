@@ -53,12 +53,11 @@ cli_opts = [
                'records from the beginning of time. If no time zone is '
                'specified, UTC will be used.'),
     cfg.StrOpt('extractor',
-               choices=SUPPORTED_EXTRACTORS,
+               choices=SUPPORTED_EXTRACTORS.keys(),
                default='nova',
-               help=('Which extractor to use for getting the data. '
-                     'Only the following middlewares are supported: %s. '
-                     'If you do not specify anything, nova will be '
-                     'used.' % SUPPORTED_EXTRACTORS.keys())),
+               help='Which extractor to use for getting the data. '
+                    'If you do not specify anything, nova will be '
+                    'used.'),
 ]
 
 CONF = cfg.CONF
