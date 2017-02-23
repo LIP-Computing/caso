@@ -95,9 +95,12 @@ class OpenStackExtractor(base.BaseExtractor):
         for server in servers:
             status = self.vm_status(server.status)
             image_id = None
-            if server.image and server.image['id'] in images:
+            if server.image:
                 image = images.get(server.image['id'])
-                image_id = image.get("vmcatcher_event_ad_mpuri", None)
+                image_id = server.image['id']
+                if image:
+                    if image.get("vmcatcher_event_ad_mpuri", None) is not None:
+                        image_id = image.get("vmcatcher_event_ad_mpuri", None)
 
             flavor = flavors.get(server.flavor["id"])
             if flavor:
@@ -116,9 +119,6 @@ class OpenStackExtractor(base.BaseExtractor):
                               "and benchmark_value_key in the configuration "
                               "file or set the correct properties in the "
                               "flavor.")
-
-            if image_id is None:
-                image_id = server.image['id']
 
             r = record.CloudRecord(server.id,
                                    CONF.site_name,
