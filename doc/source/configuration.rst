@@ -28,7 +28,7 @@ the flavor properties and configure caso to retrieve this information. There
 are two different values that need to be added to the flavor:
 
 * The benchmark name, indicated with the ``benchmark_name`` flavor property.
-* The benchmark value, indicated with the ``benchkark_value`` flavor property.
+* The benchmark value, indicated with the ``benchmark_value`` flavor property.
 
 So, if you are using HEPSPEC06 and the benchmark value is ``99`` for the flavor
 ``m1.foo`` you should set this as follows::
