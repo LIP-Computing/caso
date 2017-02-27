@@ -32,6 +32,8 @@ CONF.import_opt("extractor", "caso.extract.manager")
 CONF.import_opt("site_name", "caso.extract.manager")
 CONF.import_opt("benchmark_name_key", "caso.extract.manager")
 CONF.import_opt("benchmark_value_key", "caso.extract.manager")
+CONF.import_opt("bench_type", "caso.extract.manager")
+CONF.import_opt("bench_value", "caso.extract.manager")
 
 LOG = log.getLogger(__name__)
 
@@ -47,6 +49,34 @@ class OpenStackExtractor(base.BaseExtractor):
     def _get_glance_client(self, project):
         session = keystone_client.get_session(CONF, project)
         return glanceclient.client.Client(2, session=session)
+
+    def _get_bench(self, nova, server):
+        b_name = CONF.bench_type
+        b_value = CONF.bench_value
+
+        if b_name == '':
+            flavors = {flavor.id: flavor for flavor in nova.flavors.list()}
+            flavor = flavors.get(server.flavor["id"])
+            if flavor:
+                b_name = flavor.get_keys().get(CONF.benchmark_name_key)
+                b_value = flavor.get_keys().get(CONF.benchmark_value_key)
+            else:
+                b_name = b_value = None
+
+#        if not all([b_name, b_value]):
+#            if any([b_name, b_value]):
+#                LOG.warning("Benchmark for flavor %s not properly set" %
+#                            flavor)
+#            else:
+#                LOG.debug("Benchmark information for flavor %s not set,"
+#                          "plase indicate the corret benchmark_name_key "
+#                          "and benchmark_value_key in the configuration "
+#                          "file or set the correct properties in the "
+#                          "flavor." % flavor)
+
+        LOG.debug("Benchmark information bench_type = %s , bench_value = %s"
+                  % (b_name, b_value))
+        return b_name, b_value
 
     def extract_for_project(self, project, lastrun, extract_to):
         """Extract records for a project from given date querying nova.
@@ -71,8 +101,6 @@ class OpenStackExtractor(base.BaseExtractor):
         ks_client = self._get_keystone_client(project)
         users = self._get_keystone_users(ks_client)
         project_id = nova.client.session.get_project_id()
-
-        flavors = {flavor.id: flavor for flavor in nova.flavors.list()}
 
         servers = nova.servers.list(search_opts={"changes-since": lastrun})
 
@@ -102,24 +130,7 @@ class OpenStackExtractor(base.BaseExtractor):
                     if image.get("vmcatcher_event_ad_mpuri", None) is not None:
                         image_id = image.get("vmcatcher_event_ad_mpuri", None)
 
-            flavor = flavors.get(server.flavor["id"])
-            if flavor:
-                bench_name = flavor.get_keys().get(CONF.benchmark_name_key)
-                bench_value = flavor.get_keys().get(CONF.benchmark_value_key)
-            else:
-                bench_name = bench_value = None
-
-            if not all([bench_name, bench_value]):
-                if any([bench_name, bench_value]):
-                    LOG.warning("Benchmark for flavor %s not properly set" %
-                                flavor)
-                else:
-                    LOG.debug("Benchmark information for flavor %s not set,"
-                              "plase indicate the corret benchmark_name_key "
-                              "and benchmark_value_key in the configuration "
-                              "file or set the correct properties in the "
-                              "flavor." % flavor)
-
+            (b_name, b_value) = self._get_bench(nova, server)
             r = record.CloudRecord(server.id,
                                    CONF.site_name,
                                    server.name,
@@ -130,8 +141,8 @@ class OpenStackExtractor(base.BaseExtractor):
                                    status=status,
                                    image_id=image_id,
                                    user_dn=users.get(server.user_id, None),
-                                   benchmark_type=bench_name,
-                                   benchmark_value=bench_value)
+                                   benchmark_type=b_name,
+                                   benchmark_value=b_value)
             records[server.id] = r
 
         for usage in usages:

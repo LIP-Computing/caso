@@ -40,6 +40,15 @@
 # (string value)
 #benchmark_value_key = benchmark_value
 
+# If bench_type and bench_value are set they will supersede the previous options
+# benchmark_name_key and benchmark_value_key.
+# bench_type = HEPSPEC06. (string value)
+#bench_type = <None>
+
+# bench_value is the numerical value of bench_type for the full compute node
+# bench_value = 20. # (integer value)
+#bench_value = 0
+
 # Extract records until this date. If it is not set, we use now (string value)
 #extract_to = <None>
 

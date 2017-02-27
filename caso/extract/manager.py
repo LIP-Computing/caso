@@ -50,6 +50,12 @@ opts = [
                default='accounting:benchmark_value',
                help='Metadata key used to retrieve the benchmark value '
                     'from the flavor properties.'),
+    cfg.StrOpt('bench_type',
+               default='',
+               help='Name of the benchmark.'),
+    cfg.IntOpt('bench_value',
+               default=0,
+               help='Value of bench_type for the full compute node.'),
 
 ]
 
