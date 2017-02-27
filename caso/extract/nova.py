@@ -118,7 +118,7 @@ class OpenStackExtractor(base.BaseExtractor):
                               "plase indicate the corret benchmark_name_key "
                               "and benchmark_value_key in the configuration "
                               "file or set the correct properties in the "
-                              "flavor.")
+                              "flavor." % flavor)
 
             r = record.CloudRecord(server.id,
                                    CONF.site_name,

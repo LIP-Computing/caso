@@ -23,13 +23,25 @@
 # Service name within the site (string value)
 #service_name = $site_name
 
-# List of tenants to extract accounting records from. (list value)
-#tenants =
+# List of projects to extract accounting records from. (list value)
+# Deprecated group/name - [DEFAULT]/tenants
+#projects =
 
-# File containing the VO <-> tenant mapping as used in Keystone-VOMS. (string
+# File containing the VO <-> project mapping as used in Keystone-VOMS. (string
 # value)
 # Deprecated group/name - [extractor]/mapping_file
 #mapping_file = /etc/caso/voms.json
+
+# Metadata key used to retrieve the benchmark type from the flavor properties.
+# (string value)
+#benchmark_name_key = benchmark_type
+
+# Metadata key used to retrieve the benchmark value from the flavor properties.
+# (string value)
+#benchmark_value_key = benchmark_value
+
+# Extract records until this date. If it is not set, we use now (string value)
+#extract_to = <None>
 
 # Extract records from this date. If it is not set, extract records from last
 # run. If none are set, extract records from the beginning of time. If no time
@@ -100,7 +112,7 @@
 
 # Log output to standard error. This option is ignored if log_config_append is
 # set. (boolean value)
-#use_stderr = true
+#use_stderr = false
 
 # Format string to use for log messages with context. (string value)
 #logging_context_format_string = %(asctime)s.%(msecs)03d %(process)d %(levelname)s %(name)s [%(request_id)s %(user_identity)s] %(instance)s%(message)s
@@ -134,6 +146,18 @@
 # The format for an instance UUID that is passed with the log message. (string
 # value)
 #instance_uuid_format = "[instance: %(uuid)s] "
+
+# Interval, number of seconds, of log rate limiting. (integer value)
+#rate_limit_interval = 0
+
+# Maximum number of logged messages per rate_limit_interval. (integer value)
+#rate_limit_burst = 0
+
+# Log level name used by rate limiting: CRITICAL, ERROR, INFO, WARNING, DEBUG
+# or empty string. Logs with level greater or equal to rate_limit_except_level
+# are not filtered. An empty string means that all levels are filtered. (string
+# value)
+#rate_limit_except_level = CRITICAL
 
 # Enables or disables fatal status of deprecations. (boolean value)
 #fatal_deprecations = false

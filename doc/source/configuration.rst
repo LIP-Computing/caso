@@ -27,21 +27,31 @@ benchmark information. In order to do so, you need to add this information to
 the flavor properties and configure caso to retrieve this information. There
 are two different values that need to be added to the flavor:
 
-* The benchmark name, indicated with the ``benchmark_name`` flavor property.
-* The benchmark value, indicated with the ``benchmark_value`` flavor property.
+* The benchmark name, indicated with the ``accounting:benchmark_name`` flavor property.
+* The benchmark value, indicated with the ``accounting:benchmark_value`` flavor property.
 
 So, if you are using HEPSPEC06 and the benchmark value is ``99`` for the flavor
 ``m1.foo`` you should set this as follows::
 
-    openstack flavor set --property benchmark_name="HEPSPEC06" --property benchkark_value=99 m1.foo
+    openstack flavor set --property benchmark_name="HEPSPEC06" --property accounting:benchmark_value=99 m1.foo
 
 Using different keys
 ~~~~~~~~~~~~~~~~~~~~
 
-If you do not want to use the default flavor properties ``benchmark_name`` and
-``benchkark_value`` (for example because you are using different benchmark types
+If you do not want to use cASO's default flavor properties ``accounting:benchmark_name`` and
+``accounting:benchmark_value`` (for example because you are using different benchmark types
 and values) you can specify which properties ``cASO`` should look for by using
 the ``benchmark_name_key`` ``benchkark_value_key`` in the configuration file.
+
+.. important::
+
+    Please note that there is an OpenStack scheduler filter that removes hosts
+    based on flavor properties. In order to not interfere with the behaviour of
+    this filter you must prefix the property with a ``scope:`` so that cASO's
+    properties are not taken into account for this filtering. When adding these
+    properties in cASO's configuration file, please include the complete name
+    (i.e. ``scope:property``).
+
 
 User credentials
 ----------------

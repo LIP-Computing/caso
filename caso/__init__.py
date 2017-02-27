@@ -20,4 +20,4 @@ import pbr.version
 __version__ = pbr.version.VersionInfo(
     'caso').version_string()
 
-user_agent = "caso/%s" % __version__
+user_agent = "caso/%s (OpenStack)" % __version__
