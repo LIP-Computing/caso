@@ -74,7 +74,7 @@ class OpenStackExtractor(base.BaseExtractor):
 #                          "file or set the correct properties in the "
 #                          "flavor." % flavor)
 
-        LOG.debug("Benchmark information bench_type = %s , bench_value = %s"
+        LOG.debug("Benchmark information bench_type = %s , bench_value = %d"
                   % (b_name, b_value))
         return b_name, b_value
 
