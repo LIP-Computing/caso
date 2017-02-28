@@ -53,6 +53,15 @@ class OpenStackExtractor(base.BaseExtractor):
     def _get_bench(self, nova, server):
         b_name = CONF.bench_type
         b_value = CONF.bench_value
+        comp_node = getattr(server, 'OS-EXT-SRV-ATTR:host')
+        hvs = nova.hypervisors.list()
+        for hv in hvs:
+            # hv.vcpus_used
+            # hv.vcpus
+            if comp_node == hv.hypervisor_hostname:
+                vcpus = hv.vcpus
+                vcpus_used = hv.vcpus_used
+                LOG.debug("Host = %s , VCPUs = %d , VCPUsUsed = %d" %(hv.hypervisor_hostname, vcpus, vcpus_used))
 
         if b_name == '':
             flavors = {flavor.id: flavor for flavor in nova.flavors.list()}
