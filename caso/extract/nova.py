@@ -53,7 +53,7 @@ class OpenStackExtractor(base.BaseExtractor):
     def _get_bench_vcpu(self, nova, server):
         b_name = CONF.bench_type
         b_vcpu = CONF.bench_value
-        vcpus = 0
+        vcpus = 1
         vcpus_used = 0
         b_per_vcpu = 0.0
         comp_node = getattr(server, 'OS-EXT-SRV-ATTR:host')
@@ -69,7 +69,7 @@ class OpenStackExtractor(base.BaseExtractor):
             b_per_vcpu = 1.0*b_vcpu/vcpus_used
 
         LOG.debug("Host = %s , VCPUs = %d , VCPUsUsed = %d , Bench_perVCPU = %f" %
-                  (hv.hypervisor_hostname, vcpus, vcpus_used, b_per_vcpu))
+                  (comp_node, vcpus, vcpus_used, b_per_vcpu))
         if b_name == '':
             flavors = {flavor.id: flavor for flavor in nova.flavors.list()}
             flavor = flavors.get(server.flavor["id"])
@@ -146,7 +146,7 @@ class OpenStackExtractor(base.BaseExtractor):
                     if image.get("vmcatcher_event_ad_mpuri", None) is not None:
                         image_id = image.get("vmcatcher_event_ad_mpuri", None)
 
-            (b_name, b_vcpu) = self._get_bench_vcpu(nova, server)
+            (b_name, b_per_vcpu) = self._get_bench_vcpu(nova, server)
             r = record.CloudRecord(server.id,
                                    CONF.site_name,
                                    server.name,
@@ -157,8 +157,7 @@ class OpenStackExtractor(base.BaseExtractor):
                                    status=status,
                                    image_id=image_id,
                                    user_dn=users.get(server.user_id, None),
-                                   benchmark_type=b_name,
-                                   benchmark_value=b_vcpu)
+                                   benchmark_type=b_name)
             records[server.id] = r
 
         for usage in usages:
@@ -167,6 +166,7 @@ class OpenStackExtractor(base.BaseExtractor):
             instance_id = usage["instance_id"]
             records[instance_id].memory = usage["memory_mb"]
             records[instance_id].cpu_count = usage["vcpus"]
+            records[instance_id].benchmark_value = usage["vcpus"]*b_per_vcpu
             records[instance_id].disk = usage["local_gb"]
 
             started = dateutil.parser.parse(usage["started_at"])
