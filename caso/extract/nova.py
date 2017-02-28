@@ -50,30 +50,37 @@ class OpenStackExtractor(base.BaseExtractor):
         session = keystone_client.get_session(CONF, project)
         return glanceclient.client.Client(2, session=session)
 
-    def _get_bench(self, nova, server):
+    def _get_bench_vcpu(self, nova, server):
         b_name = CONF.bench_type
-        b_value = CONF.bench_value
+        b_vcpu = CONF.bench_value
+        vcpus = 0
+        vcpus_used = 0
+        b_per_vcpu = 0.0
         comp_node = getattr(server, 'OS-EXT-SRV-ATTR:host')
         hvs = nova.hypervisors.list()
         for hv in hvs:
-            # hv.vcpus_used
-            # hv.vcpus
             if comp_node == hv.hypervisor_hostname:
                 vcpus = hv.vcpus
                 vcpus_used = hv.vcpus_used
-                LOG.debug("Host = %s , VCPUs = %d , VCPUsUsed = %d" %(hv.hypervisor_hostname, vcpus, vcpus_used))
 
+        if vcpus_used <= vcpus:
+            b_per_vcpu = 1.0*b_vcpu/vcpus
+        else:
+            b_per_vcpu = 1.0*b_vcpu/vcpus_used
+
+        LOG.debug("Host = %s , VCPUs = %d , VCPUsUsed = %d , Bench_perVCPU = %f" %
+                  (hv.hypervisor_hostname, vcpus, vcpus_used, b_per_vcpu))
         if b_name == '':
             flavors = {flavor.id: flavor for flavor in nova.flavors.list()}
             flavor = flavors.get(server.flavor["id"])
             if flavor:
                 b_name = flavor.get_keys().get(CONF.benchmark_name_key)
-                b_value = flavor.get_keys().get(CONF.benchmark_value_key)
+                b_vcpu = flavor.get_keys().get(CONF.benchmark_value_key)
             else:
-                b_name = b_value = None
+                b_name = b_vcpu = None
 
-#        if not all([b_name, b_value]):
-#            if any([b_name, b_value]):
+#        if not all([b_name, b_vcpu]):
+#            if any([b_name, b_vcpu]):
 #                LOG.warning("Benchmark for flavor %s not properly set" %
 #                            flavor)
 #            else:
@@ -83,9 +90,9 @@ class OpenStackExtractor(base.BaseExtractor):
 #                          "file or set the correct properties in the "
 #                          "flavor." % flavor)
 
-        LOG.debug("Benchmark information bench_type = %s , bench_value = %d"
-                  % (b_name, b_value))
-        return b_name, b_value
+        LOG.debug("Benchmark information b_name = %s , b_vcpu = %d"
+                  % (b_name, b_vcpu))
+        return b_name, b_per_vcpu
 
     def extract_for_project(self, project, lastrun, extract_to):
         """Extract records for a project from given date querying nova.
@@ -139,7 +146,7 @@ class OpenStackExtractor(base.BaseExtractor):
                     if image.get("vmcatcher_event_ad_mpuri", None) is not None:
                         image_id = image.get("vmcatcher_event_ad_mpuri", None)
 
-            (b_name, b_value) = self._get_bench(nova, server)
+            (b_name, b_vcpu) = self._get_bench_vcpu(nova, server)
             r = record.CloudRecord(server.id,
                                    CONF.site_name,
                                    server.name,
@@ -151,7 +158,7 @@ class OpenStackExtractor(base.BaseExtractor):
                                    image_id=image_id,
                                    user_dn=users.get(server.user_id, None),
                                    benchmark_type=b_name,
-                                   benchmark_value=b_value)
+                                   benchmark_value=b_vcpu)
             records[server.id] = r
 
         for usage in usages:
