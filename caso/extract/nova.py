@@ -162,9 +162,8 @@ class OpenStackExtractor(base.BaseExtractor):
 
         for usage in usages:
             if usage["instance_id"] not in records:
+                LOG.info('----> STARTED: %s' % usage["started_at"])
                 continue
-
-            LOG.info('----> STARTED: %s' % usage["started_at"])
 
             instance_id = usage["instance_id"]
             records[instance_id].memory = usage["memory_mb"]
