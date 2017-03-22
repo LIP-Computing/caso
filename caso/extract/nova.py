@@ -163,6 +163,9 @@ class OpenStackExtractor(base.BaseExtractor):
         for usage in usages:
             if usage["instance_id"] not in records:
                 continue
+
+            LOG.info('----> STARTED: %s' % usage["started_at"])
+
             instance_id = usage["instance_id"]
             records[instance_id].memory = usage["memory_mb"]
             records[instance_id].cpu_count = usage["vcpus"]
