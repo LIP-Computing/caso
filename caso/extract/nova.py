@@ -161,8 +161,8 @@ class OpenStackExtractor(base.BaseExtractor):
             records[server.id] = r
 
         for usage in usages:
+            LOG.info('----> STARTED: %s' % usage["started_at"])
             if usage["instance_id"] not in records:
-                LOG.info('----> STARTED: %s' % usage["started_at"])
                 continue
 
             instance_id = usage["instance_id"]
